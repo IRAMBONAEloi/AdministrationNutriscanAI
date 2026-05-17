@@ -29,7 +29,7 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 // --- REAL API CONFIGURATION ---
-const API_BASE_URL = "https://nutriscan-foodanddrinksupply.onrender.com";
+const API_BASE_URL = "https://nutriscanai-ys7r.onrender.com";
 
 // Create axios instance
 const apiClient = axios.create({
