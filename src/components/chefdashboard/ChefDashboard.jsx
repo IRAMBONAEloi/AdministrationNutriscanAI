@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+
 // /* eslint-disable react-hooks/set-state-in-effect */
 // /* eslint-disable no-unused-vars */
 
@@ -35,11 +35,16 @@
 //   Grass as GrassIcon,
 //   Science as ScienceIcon,
 //   Logout as LogoutIcon,
+//   PictureAsPdf as PdfIcon,
+//   Download as DownloadIcon,
+//   Print as PrintIcon,
 // } from "@mui/icons-material";
 // import { useNavigate } from "react-router-dom";
+// import jsPDF from "jspdf";
+// import "jspdf-autotable";
 
 // // ========== API CONFIGURATION ==========
-// const API_BASE_URL = "https://nutriscan-foodanddrinksupply.onrender.com";
+// const API_BASE_URL = "https://nutriscanai-ys7r.onrender.com";
 
 // // Create axios instance with default config
 // const apiClient = axios.create({
@@ -59,7 +64,7 @@
 //     }
 //     return config;
 //   },
-//   (error) => Promise.reject(error)
+//   (error) => Promise.reject(error),
 // );
 
 // // Add response interceptor for error handling
@@ -81,7 +86,7 @@
 //       console.error("Request error:", error.message);
 //     }
 //     return Promise.reject(error);
-//   }
+//   },
 // );
 
 // // ========== ALLOWED STATUSES AND TRANSITIONS ==========
@@ -200,12 +205,12 @@
 //   let completedAt = null;
 //   if (apiOrder.bookingDetails?.statusHistory) {
 //     const preparingEntry = apiOrder.bookingDetails.statusHistory.find(
-//       (h) => h.status === "preparing"
+//       (h) => h.status === "preparing",
 //     );
 //     if (preparingEntry) startedAt = preparingEntry.timestamp;
 
 //     const completedEntry = apiOrder.bookingDetails.statusHistory.find(
-//       (h) => h.status === "completed"
+//       (h) => h.status === "completed",
 //     );
 //     if (completedEntry) completedAt = completedEntry.timestamp;
 //   }
@@ -214,13 +219,13 @@
 //     (apiOrder.items || []).map(async (item) => {
 //       const enriched = await enrichOrderItemWithIngredients(item, menuMap);
 //       return enriched;
-//     })
+//     }),
 //   );
 
 //   const totalPrepTime =
 //     enrichedItems.reduce(
 //       (sum, item) => sum + (item.preparationTime || item.prepTime || 15),
-//       0
+//       0,
 //     ) || 20;
 
 //   const totalAmount =
@@ -228,7 +233,7 @@
 //       (sum, item) =>
 //         sum +
 //         (item.finalPrice || item.originalPrice || 0) * (item.quantity || 1),
-//       0
+//       0,
 //     ) || 0;
 
 //   const allCustomizations = [];
@@ -288,7 +293,7 @@
 //     }
 
 //     const transformedOrders = await Promise.all(
-//       ordersArray.map((order) => transformOrder(order, menuMap))
+//       ordersArray.map((order) => transformOrder(order, menuMap)),
 //     );
 
 //     return transformedOrders;
@@ -318,8 +323,8 @@
 //   if (!ALLOWED_STATUSES.includes(newStatus)) {
 //     throw new Error(
 //       `Invalid status: ${newStatus}. Allowed statuses: ${ALLOWED_STATUSES.join(
-//         ", "
-//       )}`
+//         ", ",
+//       )}`,
 //     );
 //   }
 
@@ -332,6 +337,395 @@
 //     console.error("Error updating order status:", error);
 //     throw error;
 //   }
+// };
+
+// // ========== RECEIPT PDF GENERATION FUNCTION ==========
+// const generateReceiptPDF = (order) => {
+//   try {
+//     // Create new PDF document
+//     const doc = new jsPDF();
+
+//     // Set document properties
+//     const pageWidth = doc.internal.pageSize.getWidth();
+//     const margin = 15;
+//     let yPosition = 20;
+
+//     // Header Section
+//     doc.setFontSize(22);
+//     doc.setTextColor(128, 0, 128); // Purple color
+//     doc.setFont("helvetica", "bold");
+//     doc.text("NUTRI SCAN", pageWidth / 2, yPosition, { align: "center" });
+
+//     yPosition += 8;
+//     doc.setFontSize(12);
+//     doc.setTextColor(100, 100, 100);
+//     doc.setFont("helvetica", "normal");
+//     doc.text("Food & Drink Supply", pageWidth / 2, yPosition, {
+//       align: "center",
+//     });
+
+//     yPosition += 6;
+//     doc.setFontSize(10);
+//     doc.setTextColor(150, 150, 150);
+//     doc.text("Healthy Meals, Happy Lives", pageWidth / 2, yPosition, {
+//       align: "center",
+//     });
+
+//     // Divider Line
+//     yPosition += 10;
+//     doc.setDrawColor(200, 200, 200);
+//     doc.line(margin, yPosition, pageWidth - margin, yPosition);
+
+//     // Receipt Title
+//     yPosition += 10;
+//     doc.setFontSize(16);
+//     doc.setTextColor(0, 0, 0);
+//     doc.setFont("helvetica", "bold");
+//     doc.text("ORDER RECEIPT", pageWidth / 2, yPosition, { align: "center" });
+
+//     // Order Info Section
+//     yPosition += 12;
+//     doc.setFontSize(10);
+//     doc.setFont("helvetica", "bold");
+//     doc.setTextColor(80, 80, 80);
+//     doc.text(`Order ID:`, margin, yPosition);
+//     doc.setFont("helvetica", "normal");
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(`${order.orderId || "N/A"}`, margin + 35, yPosition);
+
+//     yPosition += 6;
+//     doc.setFont("helvetica", "bold");
+//     doc.setTextColor(80, 80, 80);
+//     doc.text(`Date:`, margin, yPosition);
+//     doc.setFont("helvetica", "normal");
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(
+//       `${new Date(order.createdAt).toLocaleString()}`,
+//       margin + 35,
+//       yPosition,
+//     );
+
+//     yPosition += 6;
+//     doc.setFont("helvetica", "bold");
+//     doc.setTextColor(80, 80, 80);
+//     doc.text(`Customer:`, margin, yPosition);
+//     doc.setFont("helvetica", "normal");
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(`${order.customerName || "Guest"}`, margin + 35, yPosition);
+
+//     yPosition += 6;
+//     doc.setFont("helvetica", "bold");
+//     doc.setTextColor(80, 80, 80);
+//     doc.text(`Table Number:`, margin, yPosition);
+//     doc.setFont("helvetica", "normal");
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(`${order.tableNumber || "N/A"}`, margin + 35, yPosition);
+
+//     yPosition += 6;
+//     doc.setFont("helvetica", "bold");
+//     doc.setTextColor(80, 80, 80);
+//     doc.text(`Order Type:`, margin, yPosition);
+//     doc.setFont("helvetica", "normal");
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(`${order.orderType || "dine-in"}`, margin + 35, yPosition);
+
+//     // Divider
+//     yPosition += 10;
+//     doc.setDrawColor(200, 200, 200);
+//     doc.line(margin, yPosition, pageWidth - margin, yPosition);
+
+//     // Items Table Header
+//     yPosition += 8;
+//     doc.setFillColor(128, 0, 128);
+//     doc.setFont("helvetica", "bold");
+//     doc.setTextColor(255, 255, 255);
+//     doc.rect(margin, yPosition, pageWidth - margin * 2, 8, "F");
+//     doc.setFontSize(9);
+//     doc.text("Item", margin + 3, yPosition + 5);
+//     doc.text("Qty", margin + 100, yPosition + 5);
+//     doc.text("Price", margin + 130, yPosition + 5);
+//     doc.text("Total", margin + 160, yPosition + 5);
+
+//     // Items Table Rows
+//     yPosition += 8;
+//     doc.setFont("helvetica", "normal");
+//     doc.setTextColor(0, 0, 0);
+//     doc.setFontSize(9);
+
+//     let tableY = yPosition;
+//     order.items?.forEach((item, index) => {
+//       const itemTotal =
+//         (item.finalPrice || item.originalPrice || 0) * (item.quantity || 1);
+
+//       // Handle multi-line item names
+//       const itemName = item.name || "Unknown Item";
+//       const itemNameLines = doc.splitTextToSize(itemName, 85);
+
+//       // Check if we need a new page
+//       if (
+//         tableY + itemNameLines.length * 5 >
+//         doc.internal.pageSize.getHeight() - 40
+//       ) {
+//         doc.addPage();
+//         tableY = 20;
+
+//         // Re-add header on new page
+//         doc.setFillColor(128, 0, 128);
+//         doc.setFont("helvetica", "bold");
+//         doc.setTextColor(255, 255, 255);
+//         doc.rect(margin, tableY, pageWidth - margin * 2, 8, "F");
+//         doc.setFontSize(9);
+//         doc.text("Item", margin + 3, tableY + 5);
+//         doc.text("Qty", margin + 100, tableY + 5);
+//         doc.text("Price", margin + 130, tableY + 5);
+//         doc.text("Total", margin + 160, tableY + 5);
+//         tableY += 8;
+//       }
+
+//       // Add item name (with wrapping)
+//       doc.setFont("helvetica", "normal");
+//       doc.setTextColor(0, 0, 0);
+//       for (let i = 0; i < itemNameLines.length; i++) {
+//         doc.text(itemNameLines[i], margin + 3, tableY + i * 4);
+//       }
+
+//       // Add quantity, price, total
+//       const rowHeight = Math.max(5, itemNameLines.length * 4);
+//       doc.text(`${item.quantity || 1}`, margin + 100, tableY + rowHeight / 2);
+//       doc.text(
+//         `RWF ${(item.finalPrice || item.originalPrice || 0).toLocaleString()}`,
+//         margin + 130,
+//         tableY + rowHeight / 2,
+//       );
+//       doc.text(
+//         `RWF ${itemTotal.toLocaleString()}`,
+//         margin + 160,
+//         tableY + rowHeight / 2,
+//       );
+
+//       tableY += rowHeight + 2;
+//     });
+
+//     // Total Amount Section
+//     yPosition = tableY + 8;
+//     doc.setDrawColor(200, 200, 200);
+//     doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
+
+//     doc.setFont("helvetica", "bold");
+//     doc.setFontSize(12);
+//     doc.setTextColor(128, 0, 128);
+//     doc.text("Total Amount:", pageWidth - margin - 70, yPosition);
+//     doc.setTextColor(0, 0, 0);
+//     doc.text(
+//       `RWF ${(order.totalAmount || 0).toLocaleString()}`,
+//       pageWidth - margin - 15,
+//       yPosition,
+//       { align: "right" },
+//     );
+
+//     // Footer Section
+//     yPosition += 15;
+//     doc.setDrawColor(200, 200, 200);
+//     doc.line(margin, yPosition, pageWidth - margin, yPosition);
+
+//     yPosition += 8;
+//     doc.setFontSize(9);
+//     doc.setTextColor(100, 100, 100);
+//     doc.setFont("helvetica", "italic");
+//     doc.text("Thank you for choosing Nutri Scan!", pageWidth / 2, yPosition, {
+//       align: "center",
+//     });
+
+//     yPosition += 5;
+//     doc.setFontSize(8);
+//     doc.setTextColor(150, 150, 150);
+//     doc.text(
+//       "For any inquiries, please contact our customer service.",
+//       pageWidth / 2,
+//       yPosition,
+//       { align: "center" },
+//     );
+
+//     yPosition += 5;
+//     doc.text(
+//       "Email: support@nutriscan.com | Phone: +250 788 123 456",
+//       pageWidth / 2,
+//       yPosition,
+//       { align: "center" },
+//     );
+
+//     return doc;
+//   } catch (error) {
+//     console.error("Error generating PDF:", error);
+//     return null;
+//   }
+// };
+
+// // ========== RECEIPT MODAL COMPONENT ==========
+// const ReceiptModal = ({ order, onClose, onDownload, onPrint }) => {
+//   if (!order) return null;
+
+//   return (
+//     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+//       <motion.div
+//         initial={{ scale: 0.9, opacity: 0 }}
+//         animate={{ scale: 1, opacity: 1 }}
+//         exit={{ scale: 0.9, opacity: 0 }}
+//         className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+//       >
+//         <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-4 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
+//           <div>
+//             <h2 className="text-white font-bold text-xl flex items-center gap-2">
+//               <PdfIcon /> Order Receipt
+//             </h2>
+//             <p className="text-green-200 text-sm">
+//               Order completed successfully
+//             </p>
+//           </div>
+//           <motion.button
+//             whileHover={{ scale: 1.1, rotate: 90 }}
+//             whileTap={{ scale: 0.9 }}
+//             onClick={onClose}
+//             className="p-1 hover:bg-white/20 rounded-full"
+//           >
+//             <CloseIcon className="text-white" />
+//           </motion.button>
+//         </div>
+
+//         <div className="p-6">
+//           {/* Receipt Content */}
+//           <div className="border-2 border-gray-200 rounded-xl p-6 mb-6 bg-white">
+//             {/* Header */}
+//             <div className="text-center border-b pb-4 mb-4">
+//               <h2 className="text-2xl font-bold text-purple-600">NUTRI SCAN</h2>
+//               <p className="text-gray-500 text-sm">Food & Drink Supply</p>
+//               <p className="text-gray-400 text-xs">
+//                 Healthy Meals, Happy Lives
+//               </p>
+//             </div>
+
+//             {/* Order Info */}
+//             <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+//               <div>
+//                 <p className="text-gray-500 text-xs">Order ID</p>
+//                 <p className="font-mono font-medium">
+//                   {order.orderId?.slice(-12)}
+//                 </p>
+//               </div>
+//               <div>
+//                 <p className="text-gray-500 text-xs">Date</p>
+//                 <p className="font-medium">
+//                   {new Date(order.createdAt).toLocaleString()}
+//                 </p>
+//               </div>
+//               <div>
+//                 <p className="text-gray-500 text-xs">Customer</p>
+//                 <p className="font-medium">{order.customerName}</p>
+//               </div>
+//               <div>
+//                 <p className="text-gray-500 text-xs">Table</p>
+//                 <p className="font-medium">Table {order.tableNumber}</p>
+//               </div>
+//             </div>
+
+//             {/* Items Table */}
+//             <div className="mb-4">
+//               <table className="w-full text-sm">
+//                 <thead className="bg-purple-50">
+//                   <tr>
+//                     <th className="text-left p-2 font-semibold text-purple-600">
+//                       Item
+//                     </th>
+//                     <th className="text-center p-2 font-semibold text-purple-600">
+//                       Qty
+//                     </th>
+//                     <th className="text-right p-2 font-semibold text-purple-600">
+//                       Price
+//                     </th>
+//                     <th className="text-right p-2 font-semibold text-purple-600">
+//                       Total
+//                     </th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   {order.items?.map((item, idx) => {
+//                     const itemTotal =
+//                       (item.finalPrice || item.originalPrice || 0) *
+//                       (item.quantity || 1);
+//                     return (
+//                       <tr key={idx} className="border-b">
+//                         <td className="p-2">{item.name}</td>
+//                         <td className="text-center p-2">{item.quantity}</td>
+//                         <td className="text-right p-2">
+//                           RWF{" "}
+//                           {(
+//                             item.finalPrice ||
+//                             item.originalPrice ||
+//                             0
+//                           ).toLocaleString()}
+//                         </td>
+//                         <td className="text-right p-2 font-medium">
+//                           RWF {itemTotal.toLocaleString()}
+//                         </td>
+//                       </tr>
+//                     );
+//                   })}
+//                 </tbody>
+//                 <tfoot>
+//                   <tr className="border-t-2">
+//                     <td colSpan="3" className="text-right p-2 font-bold">
+//                       Total:
+//                     </td>
+//                     <td className="text-right p-2 font-bold text-purple-600">
+//                       RWF {order.totalAmount?.toLocaleString() || 0}
+//                     </td>
+//                   </tr>
+//                 </tfoot>
+//               </table>
+//             </div>
+
+//             {/* Footer */}
+//             <div className="text-center border-t pt-4 mt-4">
+//               <p className="text-gray-500 text-sm">
+//                 Thank you for choosing Nutri Scan!
+//               </p>
+//               <p className="text-gray-400 text-xs mt-2">
+//                 support@nutriscan.com | +250 788 123 456
+//               </p>
+//             </div>
+//           </div>
+
+//           {/* Action Buttons */}
+//           <div className="flex gap-3">
+//             <motion.button
+//               whileHover={{ scale: 1.02 }}
+//               whileTap={{ scale: 0.98 }}
+//               onClick={onDownload}
+//               className="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2 font-medium"
+//             >
+//               <DownloadIcon /> Download PDF
+//             </motion.button>
+//             <motion.button
+//               whileHover={{ scale: 1.02 }}
+//               whileTap={{ scale: 0.98 }}
+//               onClick={onPrint}
+//               className="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition flex items-center justify-center gap-2 font-medium"
+//             >
+//               <PrintIcon /> Print Receipt
+//             </motion.button>
+//             <motion.button
+//               whileHover={{ scale: 1.02 }}
+//               whileTap={{ scale: 0.98 }}
+//               onClick={onClose}
+//               className="px-6 border border-gray-300 py-3 rounded-lg hover:bg-gray-50 transition font-medium"
+//             >
+//               Close
+//             </motion.button>
+//           </div>
+//         </div>
+//       </motion.div>
+//     </div>
+//   );
 // };
 
 // // ========== ANIMATED BUTTON COMPONENT ==========
@@ -426,7 +820,7 @@
 //     if (order.status === "preparing" && order.startedAt) {
 //       const interval = setInterval(() => {
 //         const elapsed = Math.floor(
-//           (Date.now() - new Date(order.startedAt)) / 60000
+//           (Date.now() - new Date(order.startedAt)) / 60000,
 //         );
 //         setTimeElapsed(elapsed);
 //       }, 60000);
@@ -709,8 +1103,8 @@
 //                       item.purineLevel === "low"
 //                         ? "bg-green-100 text-green-700"
 //                         : item.purineLevel === "moderate"
-//                         ? "bg-yellow-100 text-yellow-700"
-//                         : "bg-red-100 text-red-700"
+//                           ? "bg-yellow-100 text-yellow-700"
+//                           : "bg-red-100 text-red-700"
 //                     }`}
 //                   >
 //                     {item.purineLevel} purine
@@ -812,7 +1206,7 @@
 // };
 
 // // ========== ORDER DETAILS MODAL ==========
-// const OrderDetailsModal = ({
+// const  OrderDetailsModal = ({
 //   order,
 //   onClose,
 //   onStartPreparation,
@@ -912,7 +1306,7 @@
 //                 initial={{ scale: 0.8 }}
 //                 animate={{ scale: 1 }}
 //                 className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-//                   order.status
+//                   order.status,
 //                 )}`}
 //               >
 //                 {order.status}
@@ -1295,6 +1689,7 @@
 //   const [orders, setOrders] = useState([]);
 //   const [activeTab, setActiveTab] = useState("active");
 //   const [selectedOrder, setSelectedOrder] = useState(null);
+//   const [receiptOrder, setReceiptOrder] = useState(null); // State for receipt modal
 //   const [searchTerm, setSearchTerm] = useState("");
 //   const [loading, setLoading] = useState(true);
 //   const [isConnected, setIsConnected] = useState(true);
@@ -1312,48 +1707,48 @@
 
 //   const navigate = useNavigate();
 
-// const handleLogout = async () => {
-//   const token = localStorage.getItem("auth_token");
+//   const handleLogout = async () => {
+//     const token = localStorage.getItem("auth_token");
 
-//   try {
-//     if (token) {
-//       await axios.post(
-//         "https://nutriscan-foodanddrinksupply.onrender.com/auth/logout",
-//         {},
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
+//     try {
+//       if (token) {
+//         await axios.post(
+//           "https://nutriscan-foodanddrinksupply.onrender.com/auth/logout",
+//           {},
+//           {
+//             headers: {
+//               Authorization: `Bearer ${token}`,
+//             },
 //           },
-//         }
-//       );
+//         );
+//       }
+
+//       toast.success("Logged out successfully");
+//     } catch (error) {
+//       console.error("LOGOUT ERROR:", error.response?.data || error.message);
+//       toast.error("Session ended");
+//     } finally {
+//       // 1. CLEAR STORAGE
+//       localStorage.clear();
+//       sessionStorage.clear();
+
+//       // 2. CLEAR COOKIES (IMPORTANT)
+//       document.cookie.split(";").forEach((cookie) => {
+//         document.cookie = cookie
+//           .replace(/^ +/, "")
+//           .replace(/=.*/, "=;expires=" + new Date(0).toUTCString() + ";path=/");
+//       });
+
+//       // 3. CLEAR AXIOS AUTH HEADER
+//       delete axios.defaults.headers.common["Authorization"];
+
+//       // 4. FORCE HARD RESET STATE (important if using React state)
+//       window.dispatchEvent(new Event("logout"));
+
+//       // 5. FORCE REDIRECT (no back to dashboard)
+//       window.location.replace("/login");
 //     }
-
-//     toast.success("Logged out successfully");
-//   } catch (error) {
-//     console.error("LOGOUT ERROR:", error.response?.data || error.message);
-//     toast.error("Session ended");
-//   } finally {
-//     // 1. CLEAR STORAGE
-//     localStorage.clear();
-//     sessionStorage.clear();
-
-//     // 2. CLEAR COOKIES (IMPORTANT)
-//     document.cookie.split(";").forEach((cookie) => {
-//       document.cookie = cookie
-//         .replace(/^ +/, "")
-//         .replace(/=.*/, "=;expires=" + new Date(0).toUTCString() + ";path=/");
-//     });
-
-//     // 3. CLEAR AXIOS AUTH HEADER
-//     delete axios.defaults.headers.common["Authorization"];
-
-//     // 4. FORCE HARD RESET STATE (important if using React state)
-//     window.dispatchEvent(new Event("logout"));
-
-//     // 5. FORCE REDIRECT (no back to dashboard)
-//     window.location.replace("/login");
-//   }
-// };
+//   };
 
 //   const calculateStats = useCallback((ordersList) => {
 //     const preparing = ordersList.filter((o) => o.status === "preparing").length;
@@ -1362,10 +1757,10 @@
 //     const completedToday = ordersList.filter(
 //       (o) =>
 //         o.status === "completed" &&
-//         new Date(o.createdAt).toDateString() === new Date().toDateString()
+//         new Date(o.createdAt).toDateString() === new Date().toDateString(),
 //     ).length;
 //     const completedOrdersWithTimes = ordersList.filter(
-//       (o) => o.status === "completed" && o.startedAt && o.completedAt
+//       (o) => o.status === "completed" && o.startedAt && o.completedAt,
 //     );
 //     const avgTime =
 //       completedOrdersWithTimes.length > 0
@@ -1374,7 +1769,7 @@
 //               const start = new Date(o.startedAt);
 //               const end = new Date(o.completedAt);
 //               return sum + (end - start) / 60000;
-//             }, 0) / completedOrdersWithTimes.length
+//             }, 0) / completedOrdersWithTimes.length,
 //           )
 //         : 0;
 //     const totalRevenue = ordersList
@@ -1406,13 +1801,13 @@
 //         const newOrders = apiOrders.filter(
 //           (o) =>
 //             o.status === "preparing" &&
-//             !previousOrders.some((prev) => prev._id === o._id)
+//             !previousOrders.some((prev) => prev._id === o._id),
 //         );
 //         if (newOrders.length > 0) {
 //           toast.info(
 //             `${newOrders.length} new order${
 //               newOrders.length > 1 ? "s" : ""
-//             } received!`
+//             } received!`,
 //           );
 //         }
 //         previousOrdersRef.current = apiOrders;
@@ -1420,15 +1815,39 @@
 //         console.error("Error loading orders:", error);
 //         setIsConnected(false);
 //         toast.error(
-//           "Failed to load orders from server. Check your connection."
+//           "Failed to load orders from server. Check your connection.",
 //         );
 //       } finally {
 //         setLoading(false);
 //         setRefreshing(false);
 //       }
 //     },
-//     [calculateStats]
+//     [calculateStats],
 //   );
+
+//   // Handle PDF download
+//   const handleDownloadPDF = (order) => {
+//     const doc = generateReceiptPDF(order);
+//     if (doc) {
+//       const fileName = `receipt_${order.orderId || "order"}_${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.pdf`;
+//       doc.save(fileName);
+//       toast.success("Receipt PDF downloaded successfully!");
+//     } else {
+//       toast.error("Failed to generate PDF");
+//     }
+//   };
+
+//   // Handle print
+//   const handlePrint = (order) => {
+//     const doc = generateReceiptPDF(order);
+//     if (doc) {
+//       doc.autoPrint();
+//       window.open(doc.output("bloburl"), "_blank");
+//       toast.success("Print dialog opened!");
+//     } else {
+//       toast.error("Failed to generate PDF for printing");
+//     }
+//   };
 
 //   // Update order status
 //   const updateOrderStatus = async (order, newStatus) => {
@@ -1449,9 +1868,21 @@
 //     try {
 //       await updateOrderStatusAPI(order.orderId, newStatus);
 //       toast.success(
-//         `Order #${order.orderId?.slice(-8)} marked as ${newStatus}`
+//         `Order #${order.orderId?.slice(-8)} marked as ${newStatus}`,
 //       );
-//       await loadOrders(false);
+
+//       // If status is being changed to "completed", show receipt modal
+//       if (newStatus === "completed") {
+//         // Refresh orders to get the latest data
+//         await loadOrders(false);
+//         // Find the updated order
+//         const updatedOrder = orders.find((o) => o._id === order._id) || order;
+//         // Show receipt modal
+//         setReceiptOrder(updatedOrder);
+//         toast.info("Receipt is ready for download!");
+//       } else {
+//         await loadOrders(false);
+//       }
 //     } catch (error) {
 //       const errorMsg =
 //         error.response?.data?.message ||
@@ -1472,7 +1903,6 @@
 
 //   const markAsCompleted = async (order) => {
 //     await updateOrderStatus(order, "completed");
-//     toast.success(`Order #${order.orderId?.slice(-8)} is completed!`);
 //   };
 
 //   useEffect(() => {
@@ -1501,11 +1931,11 @@
 //         (o) =>
 //           o.orderId?.toLowerCase().includes(term) ||
 //           o.tableNumber?.toString().includes(term) ||
-//           o.customerName?.toLowerCase().includes(term)
+//           o.customerName?.toLowerCase().includes(term),
 //       );
 //     }
 //     return filtered.sort(
-//       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+//       (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
 //     );
 //   };
 
@@ -1746,9 +2176,35 @@
 //           />
 //         )}
 //       </AnimatePresence>
+
+//       {/* Receipt Modal */}
+//       <AnimatePresence>
+//         {receiptOrder && (
+//           <ReceiptModal
+//             order={receiptOrder}
+//             onClose={() => setReceiptOrder(null)}
+//             onDownload={() => handleDownloadPDF(receiptOrder)}
+//             onPrint={() => handlePrint(receiptOrder)}
+//           />
+//         )}
+//       </AnimatePresence>
 //     </div>
 //   );
 // };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable no-unused-vars */
@@ -2299,7 +2755,7 @@ const generateReceiptPDF = (order) => {
 
     yPosition += 5;
     doc.text(
-      "Email: support@nutriscan.com | Phone: +250 788 123 456",
+      "Email: inventoryms@nutriscan.ai | Phone: +250 785 036 368",
       pageWidth / 2,
       yPosition,
       { align: "center" },
@@ -2441,7 +2897,7 @@ const ReceiptModal = ({ order, onClose, onDownload, onPrint }) => {
                 Thank you for choosing Nutri Scan!
               </p>
               <p className="text-gray-400 text-xs mt-2">
-                support@nutriscan.com | +250 788 123 456
+                support@nutriscan.com | +250 785 036 368
               </p>
             </div>
           </div>
@@ -2957,7 +3413,7 @@ const KitchenOrderCard = ({
 };
 
 // ========== ORDER DETAILS MODAL ==========
-const  OrderDetailsModal = ({
+const OrderDetailsModal = ({
   order,
   onClose,
   onStartPreparation,
@@ -3456,6 +3912,12 @@ export const ChefDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const previousOrdersRef = useRef([]);
 
+  // Refs to track modal states for preservation during refresh
+  const modalsStateRef = useRef({
+    selectedOrder: null,
+    receiptOrder: null,
+  });
+
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -3464,7 +3926,7 @@ export const ChefDashboard = () => {
     try {
       if (token) {
         await axios.post(
-          "https://nutriscan-foodanddrinksupply.onrender.com/auth/logout",
+          "https://nutriscanai-ys7r.onrender.com/auth/logout",
           {},
           {
             headers: {
@@ -3548,6 +4010,25 @@ export const ChefDashboard = () => {
         setLastRefresh(new Date());
         setIsConnected(true);
         calculateStats(apiOrders);
+
+        // After orders update, restore any open modals that refer to orders
+        if (modalsStateRef.current.selectedOrder) {
+          const updatedOrder = apiOrders.find(
+            (o) => o._id === modalsStateRef.current.selectedOrder._id,
+          );
+          if (updatedOrder) {
+            setSelectedOrder(updatedOrder);
+          }
+        }
+        if (modalsStateRef.current.receiptOrder) {
+          const updatedReceiptOrder = apiOrders.find(
+            (o) => o._id === modalsStateRef.current.receiptOrder._id,
+          );
+          if (updatedReceiptOrder) {
+            setReceiptOrder(updatedReceiptOrder);
+          }
+        }
+
         const previousOrders = previousOrdersRef.current;
         const newOrders = apiOrders.filter(
           (o) =>
@@ -3628,6 +4109,8 @@ export const ChefDashboard = () => {
         await loadOrders(false);
         // Find the updated order
         const updatedOrder = orders.find((o) => o._id === order._id) || order;
+        // Store in ref for preservation
+        modalsStateRef.current.receiptOrder = updatedOrder;
         // Show receipt modal
         setReceiptOrder(updatedOrder);
         toast.info("Receipt is ready for download!");
@@ -3656,15 +4139,36 @@ export const ChefDashboard = () => {
     await updateOrderStatus(order, "completed");
   };
 
+  // Set up polling for real-time data updates
   useEffect(() => {
+    // Initial load
     loadOrders();
-    const interval = setInterval(() => {
+
+    // Set up interval to check for new data every 10 seconds
+    const intervalId = setInterval(() => {
       if (isConnected) {
+        // Save current modal states before background refresh
+        modalsStateRef.current = {
+          selectedOrder: selectedOrder,
+          receiptOrder: receiptOrder,
+        };
+        // Fetch data in background
         loadOrders(false);
       }
-    }, 30000);
-    return () => clearInterval(interval);
+    }, 10000); // Poll every 10 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, [loadOrders, isConnected]);
+
+  // Handle modal state changes to update ref
+  useEffect(() => {
+    modalsStateRef.current.selectedOrder = selectedOrder;
+  }, [selectedOrder]);
+
+  useEffect(() => {
+    modalsStateRef.current.receiptOrder = receiptOrder;
+  }, [receiptOrder]);
 
   const getFilteredOrders = () => {
     let filtered = orders;
@@ -3803,7 +4307,7 @@ export const ChefDashboard = () => {
       />
 
       <div className="p-4 sm:p-6 pb-2">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
             title="In Progress"
             value={stats.preparingOrders}
@@ -3824,12 +4328,7 @@ export const ChefDashboard = () => {
             icon={<CheckCircleIcon className="text-gray-600" />}
             color="border-gray-500"
           />
-          <StatCard
-            title="Completed Today"
-            value={stats.completedToday}
-            icon={<TrophyIcon className="text-teal-600" />}
-            color="border-teal-500"
-          />
+          
           <StatCard
             title="Avg Prep Time"
             value={`${stats.avgPreparationTime} min`}
@@ -3942,3 +4441,4 @@ export const ChefDashboard = () => {
     </div>
   );
 };
+
