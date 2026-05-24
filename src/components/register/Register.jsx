@@ -209,12 +209,7 @@ export const Register = () => {
 
   // Role options - matches schema enum values
   const roleOptions = [
-    {
-      value: "staff",
-      label: "Staff Member",
-      description: "Regular restaurant staff",
-      icon: "👤",
-    },
+
     {
       value: "chef",
       label: "Chef",
@@ -296,7 +291,7 @@ export const Register = () => {
               <div className="mt-6 space-y-2 text-sm text-amber-50">
                 <p>✓ {getRoleIcon("manager")} Manager access</p>
                 <p>✓ {getRoleIcon("chef")} Chef dashboard</p>
-                <p>✓ {getRoleIcon("staff")} Staff portal</p>
+               
               </div>
             </div>
           </div>
