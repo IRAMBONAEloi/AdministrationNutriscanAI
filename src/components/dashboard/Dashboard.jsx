@@ -5235,7 +5235,7 @@ export const Dashboard = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-gradient-to-br from-gray-50 to-orange-50/20"
+      className="min-h-screen bg-gradient-to-br from-gray-300 to-gray-100"
     >
       <ToastContainer position="top-right" />
       <motion.header
